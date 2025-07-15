@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String   @unique
+  displayName String
+  password    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  createdEvents  Event[] @relation("EventCreator")
+  assignedEvents EventUserAssignment[]
+
+  @@map("users")
+}
+
+model Event {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  type      String
+  timestamp DateTime
+  metadata  String? // JSON stored as string for SQLite
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Foreign keys
+  creatorId String
+
+  // Relations
+  creator         User                  @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  assignedUsers   EventUserAssignment[]
+  tags            EventTag[]
+  attachments     Attachment[]
+  editHistory     EventEditHistory[]
+
+  @@index([timestamp])
+  @@index([type])
+  @@index([creatorId])
+  @@map("events")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  events EventTag[]
+
+  @@map("tags")
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  uploadedAt   DateTime @default(now())
+
+  // Foreign keys
+  eventId String
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("attachments")
+}
+
+// Junction table for Event-User many-to-many relationship
+model EventUserAssignment {
+  eventId String
+  userId  String
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+  @@map("event_user_assignments")
+}
+
+// Junction table for Event-Tag many-to-many relationship
+model EventTag {
+  eventId String
+  tagId   String
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, tagId])
+  @@map("event_tags")
+}
+
+// Edit history tracking
+model EventEditHistory {
+  id        String   @id @default(cuid())
+  eventId   String
+  changes   String // JSON stored as string for SQLite
+  editedAt  DateTime @default(now())
+  editedBy  String
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([editedAt])
+  @@map("event_edit_history")
+}
+
