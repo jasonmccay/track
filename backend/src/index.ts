@@ -4,6 +4,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { checkDatabaseConnection } from './lib/db-utils';
 import userRoutes from './routes/users';
+import authRoutes from './routes/auth';
+import tagRoutes from './routes/tags';
+import eventRoutes from './routes/events';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +29,9 @@ app.get('/api', (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/tags', tagRoutes);
+app.use('/api/events', eventRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

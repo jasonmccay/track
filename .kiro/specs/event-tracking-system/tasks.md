@@ -26,14 +26,14 @@
   - Write unit tests for user operations
   - _Requirements: 1.3, 2.1, 2.3, 6.4, 8.5_
 
-- [ ] 5. Build basic authentication system
+- [x] 5. Build basic authentication system
   - Implement JWT-based authentication middleware
   - Create login/register endpoints with password hashing
   - Add authentication validation to protected routes
   - Write tests for authentication flows
   - _Requirements: 1.3, 8.5_
 
-- [ ] 6. Implement tag management system
+- [x] 6. Implement tag management system
   - Create Tag model with CRUD operations
   - Implement tag repository with database operations
   - Create API endpoints for tag management (/api/tags)
@@ -41,7 +41,7 @@
   - Write unit tests for tag operations
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 6.2_
 
-- [ ] 7. Create event management core functionality
+- [x] 7. Create event management core functionality
   - Implement Event model with all event types support
   - Create event repository with CRUD operations
   - Build API endpoints for basic event operations (POST, GET, PUT, DELETE /api/events)

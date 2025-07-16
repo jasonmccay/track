@@ -28,7 +28,7 @@ export interface Event {
 export interface Tag {
   id: string;
   name: string;
-  color?: string;
+  color: string | null;
   createdAt: Date;
 }
 
@@ -90,7 +90,7 @@ export interface CreateUserRequest {
 
 export interface CreateTagRequest {
   name: string;
-  color?: string;
+  color?: string | null;
 }
 
 export interface SearchEventsRequest {

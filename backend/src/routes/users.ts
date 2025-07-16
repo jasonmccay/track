@@ -2,6 +2,7 @@ import express from 'express';
 import { UserRepository } from '../repositories/userRepository';
 import { CreateUserSchema, UpdateUserSchema } from '../lib/validation';
 import { ApiError } from '../types/models';
+import { authenticateToken, AuthenticatedRequest } from '../lib/auth';
 
 const router = express.Router();
 const userRepository = new UserRepository();
@@ -115,8 +116,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/users/:id - Update user
-router.put('/:id', async (req, res) => {
+// PUT /api/users/:id - Update user (requires authentication)
+router.put('/:id', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const validation = UpdateUserSchema.safeParse(req.body);
@@ -134,6 +135,18 @@ router.put('/:id', async (req, res) => {
     }
 
     const userData = validation.data;
+
+    // Check ownership - users can only update their own account
+    if (req.user!.id !== id) {
+      return res.status(403).json({
+        error: {
+          code: 'INSUFFICIENT_PERMISSIONS',
+          message: 'You can only update your own account',
+        },
+        timestamp: new Date().toISOString(),
+        path: req.path,
+      });
+    }
 
     // Check if user exists
     const existingUser = await userRepository.findById(id);
@@ -204,10 +217,22 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/users/:id - Delete user
-router.delete('/:id', async (req, res) => {
+// DELETE /api/users/:id - Delete user (requires authentication)
+router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
+    
+    // Check ownership - users can only delete their own account
+    if (req.user!.id !== id) {
+      return res.status(403).json({
+        error: {
+          code: 'INSUFFICIENT_PERMISSIONS',
+          message: 'You can only delete your own account',
+        },
+        timestamp: new Date().toISOString(),
+        path: req.path,
+      });
+    }
     
     // Check if user exists
     const existingUser = await userRepository.findById(id);
